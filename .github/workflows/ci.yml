@@ -9,12 +9,11 @@ jobs:
   SETUP:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install modules
-      run: npm install
+      - uses: actions/checkout@v4
+      - name: Install modules
+        run: npm install
 
-  API-TESTS:
-    needs: SETUP
+  COMMON-STEPS:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,28 +28,21 @@ jobs:
         with:
           install-command: npm run install:frontend
           runTests: false
+
+  API-TESTS:
+    needs: [SETUP, COMMON-STEPS]
+    runs-on: ubuntu-latest
+    steps:
       - name: Run API tests
         uses: cypress-io/github-action@v6
         with:
-         start: npm run start:frontend, npm run start:server
-         command: npm run api:run
+          start: npm run start:frontend, npm run start:server
+          command: npm run api:run
 
   ACCESSIBILITY-TESTS:
-    needs: SETUP
+    needs: [SETUP, COMMON-STEPS]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install backend
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npm run install:backend
-          runTests: false
-      - name: Install frontend
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npm run install:frontend
-          runTests: false
       - name: Run Accessibility tests
         uses: cypress-io/github-action@v6
         with:
