@@ -20,7 +20,8 @@ jobs:
       - name: Install modules
         run: npm install
 
-  COMMON-STEPS:
+  API-TESTS:
+    needs: SETUP
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,11 +43,6 @@ jobs:
         with:
           install-command: npm run install:frontend
           runTests: false
-
-  API-TESTS:
-    needs: [SETUP, COMMON-STEPS]
-    runs-on: ubuntu-latest
-    steps:
       - name: Run API tests
         uses: cypress-io/github-action@v6
         with:
@@ -54,9 +50,28 @@ jobs:
           command: npm run api:run
 
   ACCESSIBILITY-TESTS:
-    needs: [SETUP, COMMON-STEPS]
+    needs: SETUP
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install backend
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npm run install:backend
+          runTests: false
+      - name: Install frontend
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npm run install:frontend
+          runTests: false
       - name: Run Accessibility tests
         uses: cypress-io/github-action@v6
         with:
